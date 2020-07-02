@@ -1,25 +1,27 @@
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
+using ProjectManager.Database.Models;
 
 namespace ProjectManager.Database
 {
     public class DatabaseContext : DbContext
     {
         private readonly IConnectionInitializer _connectionInitializer;
+        
+        public DbSet<User> Users { get; set; }
 
         public DatabaseContext(IConnectionInitializer connectionInitializer)
         {
             this._connectionInitializer = connectionInitializer;
         }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var databaseInitializer = _connectionInitializer.Create<DatabaseContext>(modelBuilder);
-            System.Data.Entity.Database.SetInitializer(databaseInitializer);
+            _connectionInitializer.Configure(optionsBuilder);
         }
     }
 
     public interface IConnectionInitializer
     {
-        public IDatabaseInitializer<TContext> Create<TContext>(DbModelBuilder builder) where TContext : DbContext;
+        public void Configure(DbContextOptionsBuilder optionsBuilder);
     }
 }
