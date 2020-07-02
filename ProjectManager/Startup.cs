@@ -1,3 +1,4 @@
+using System;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -22,6 +23,13 @@ namespace ProjectManager
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = ".ProjectManager.Session";
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.IsEssential = true;
+            });
+            
             services.AddControllersWithViews();
 
             // In production, the React files will be served from this directory
@@ -53,6 +61,9 @@ namespace ProjectManager
             app.UseSpaStaticFiles();
 
             app.UseRouting();
+            
+            app.UseSession();
+            app.UseCookiePolicy();
 
             app.UseEndpoints(endpoints =>
             {

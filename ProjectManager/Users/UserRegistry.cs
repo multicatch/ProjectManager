@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using ProjectManager.Database;
 using ProjectManager.Database.Models;
+using ProjectManager.Utils;
 
 namespace ProjectManager.Users
 {
@@ -9,26 +10,37 @@ namespace ProjectManager.Users
     {
         private readonly DatabaseContext _databaseContext;
         private readonly IPasswordPolicyValidator _passwordPolicyValidator;
+        private readonly IPasswordHash _passwordHash;
 
-        public UserRegistry(DatabaseContext databaseContext, IPasswordPolicyValidator passwordPolicyValidator)
+        public UserRegistry(DatabaseContext databaseContext, IPasswordPolicyValidator passwordPolicyValidator, IPasswordHash passwordHash)
         {
             _databaseContext = databaseContext;
             _passwordPolicyValidator = passwordPolicyValidator;
+            _passwordHash = passwordHash;
         }
 
         public void Create(string name, string password)
         {
-            if (String.IsNullOrWhiteSpace(name) || String.IsNullOrWhiteSpace(password))
+            Validate.NotNullOrBlank(name, "Name cannot be blank.");
+            Validate.NotNullOrBlank(password, "Password cannot be blank.");
+            Validate.ShouldThrow<UserNotExistsException>(() =>
             {
-                throw new ArgumentException("Name and password cannot be null or empty.");
-            }
-
-            var exists = _databaseContext.Users.AsEnumerable().Any(u => u.Name == name);
-            if (exists)
+                Find(name);
+            }, "User " + name + " already exists.");
+            ValidatePassword(password);
+            
+            var hashedPassword = _passwordHash.Hash(password);
+            var user = new User
             {
-                throw new UserAlreadyExistsException("User " + name + " already exists.");
-            }
+                Name = name,
+                PasswordHash = hashedPassword
+            };
+            _databaseContext.Add(user);
+            _databaseContext.SaveChanges();
+        }
 
+        private void ValidatePassword(string password)
+        {
             try
             {
                 _passwordPolicyValidator.Validate(password);
@@ -38,20 +50,22 @@ namespace ProjectManager.Users
                 throw new ArgumentException(e.Message, e);
             }
 
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            var user = new User
+        }
+
+        public User Find(string name)
+        {
+            var user = _databaseContext.Users.AsEnumerable().SingleOrDefault(u => u.Name == name);
+            if (user == null)
             {
-                Name = name,
-                PasswordHash = hashedPassword
-            };
-            _databaseContext.Add(user);
-            _databaseContext.SaveChanges();
+                throw new UserNotExistsException("User " + name + " does not exist");
+            }
+            return user;
         }
     }
 
-    public class UserAlreadyExistsException : Exception
+    public class UserNotExistsException : Exception
     {
-        public UserAlreadyExistsException(string message)
+        public UserNotExistsException(string message)
             : base(message)
         {
         }

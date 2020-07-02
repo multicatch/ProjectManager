@@ -10,25 +10,25 @@ namespace ProjectManager.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserRegistry _userRegistry;
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<UserController> _logger;
 
-        public UserController(UserRegistry userRegistry, ILogger<WeatherForecastController> logger)
+        public UserController(UserRegistry userRegistry, ILogger<UserController> logger)
         {
             _userRegistry = userRegistry;
             _logger = logger;
         }
 
         [HttpPost]
-        public IActionResult AddUser([FromBody] UserRequest createUserRequest)
+        public IActionResult CreateUser([FromBody] UserRequest createUserRequest)
         {
             try
             {
                 _userRegistry.Create(createUserRequest.Name, createUserRequest.Password);
                 return Ok();
             }
-            catch (Exception e) when (e is ArgumentException || e is UserAlreadyExistsException)
+            catch (ArgumentException e)
             {
-                return BadRequest(e.Message);
+                return BadRequest(new SimpleMessageResponse(e.Message));
             }
             catch (Exception e)
             {

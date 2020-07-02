@@ -6,8 +6,10 @@ namespace ProjectManager.Users
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<UserRegistry>().AsSelf();
+            builder.RegisterType<BCryptPasswordHash>().As<IPasswordHash>();
             builder.RegisterType<CompositePolicyValidator>().As<IPasswordPolicyValidator>().SingleInstance();
+            builder.RegisterType<UserRegistry>().AsSelf();
+            builder.RegisterType<IdentityProvider>().AsSelf();
         }
     }
 }
