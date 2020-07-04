@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {request} from "../requests";
-import {Button} from "reactstrap";
+import {Button, NavLink} from "reactstrap";
+import {Link} from "react-router-dom";
 
 export class Home extends Component {
     static displayName = Home.name;
@@ -79,7 +80,7 @@ export class Home extends Component {
                 <h1>Hello, world!</h1>
                 <p>Welcome to ProjectManager. Here are your projects:</p>
                 {userProjects}
-                <p><Button>Create project</Button></p>
+                <p><NavLink tag={Link} className="text-dark" to="/createproject"><Button color="primary">Create project</Button></NavLink></p>
                 <p>You can also join other projects:</p>
                 {otherProjects}
             </div>

@@ -1,5 +1,5 @@
 export class Requests {
-    static invalidSessionFallback = () => {}  
+    static invalidSessionCallback = () => {}  
 }
 
 export const request = (endpoint, method = 'GET', entity = null) => {
@@ -12,7 +12,7 @@ export const request = (endpoint, method = 'GET', entity = null) => {
         body: entity ? JSON.stringify(entity) : undefined
     }).then(response => {
         if (response.status === 401) {
-            Requests.invalidSessionFallback();
+            Requests.invalidSessionCallback();
         }
         return response
     })

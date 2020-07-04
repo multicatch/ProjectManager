@@ -34,14 +34,12 @@ namespace ProjectManager.Controllers
 
             try
             {
-                _projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue);
+                return Ok(_projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue));
             }
             catch (ArgumentException e)
             {
-                return BadRequest();
+                return BadRequest(new SimpleMessageResponse(e.Message));
             }
-
-            return Ok();
         }
 
         [HttpPost("{projectId}")]

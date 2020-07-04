@@ -6,6 +6,8 @@ import {Counter} from './components/Counter';
 import './custom.css'
 import {Login} from "./components/Login";
 import {request, Requests} from "./requests";
+import "./components/CreateProject";
+import {CreateProject} from "./components/CreateProject";
 
 export default class App extends Component {
     static displayName = App.name;
@@ -16,7 +18,7 @@ export default class App extends Component {
     
     componentDidMount() {
         this.checkIfLogged()
-        Requests.invalidSessionFallback = () => {
+        Requests.invalidSessionCallback = () => {
             this.setState({
                 logged: false
             });
@@ -28,6 +30,7 @@ export default class App extends Component {
             return (
                 <Layout>
                     <Route exact path='/' component={Home}/>
+                    <Route path='/createproject' component={CreateProject}/>
                     <Route path='/counter' component={Counter}/>
                 </Layout>
             );

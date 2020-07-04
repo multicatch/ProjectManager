@@ -36,7 +36,7 @@ namespace ProjectManager.Projects
             );
         } 
 
-        public void Create(string name, float hourValue)
+        public Project Create(string name, float hourValue)
         {
             Validate.NotNullOrBlank(name, "Name cannot be blank.");
             Validate.NotNegative(hourValue, "Hour Value cannot be negative.");
@@ -50,6 +50,7 @@ namespace ProjectManager.Projects
             };
             _databaseContext.Add(project);
             _databaseContext.SaveChanges();
+            return project;
         }
 
         public void Join(User user, int projectId)
