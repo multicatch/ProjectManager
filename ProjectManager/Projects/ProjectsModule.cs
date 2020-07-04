@@ -1,4 +1,5 @@
 using Autofac;
+using ProjectManager.Projects.Issues;
 
 namespace ProjectManager.Projects
 {
@@ -7,6 +8,7 @@ namespace ProjectManager.Projects
         protected override void Load(ContainerBuilder builder)
         {
             builder.RegisterType<ProjectsRegistry>().AsSelf();
+            builder.RegisterType<IssueRegistry>().AsSelf();
         }
     }
 }

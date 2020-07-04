@@ -1,4 +1,5 @@
 using System;
+using System.Text.Json.Serialization;
 using Autofac;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,13 +31,17 @@ namespace ProjectManager
                 options.IdleTimeout = TimeSpan.FromMinutes(10);
                 options.Cookie.IsEssential = true;
             });
-            
-            services.AddControllersWithViews();
+
+            services.AddControllersWithViews()
+                .AddJsonOptions(opt =>
+                {
+                    opt.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });
 
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration => { configuration.RootPath = "ClientApp/build"; });
         }
-        
+
         public void ConfigureContainer(ContainerBuilder builder)
         {
             builder.RegisterModule(new DatabaseModule());
@@ -63,7 +68,7 @@ namespace ProjectManager
             app.UseSpaStaticFiles();
 
             app.UseRouting();
-            
+
             app.UseSession();
             app.UseCookiePolicy();
 

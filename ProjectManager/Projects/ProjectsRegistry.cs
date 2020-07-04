@@ -49,7 +49,7 @@ namespace ProjectManager.Projects
             return new ProjectDetails(project.Id, project.Name, project.HourValue, project.Creator.Name, members);
         }
 
-        public ProjectDetails Create(string name, float hourValue, User creator)
+        public Project Create(string name, float hourValue, User creator)
         {
             Validate.NotNullOrBlank(name, "Name cannot be blank.");
             Validate.NotNegative(hourValue, "Hour Value cannot be negative.");
@@ -65,10 +65,7 @@ namespace ProjectManager.Projects
             _databaseContext.Add(project);
             _databaseContext.SaveChanges();
             Join(creator, project.Id);
-            return new ProjectDetails(project.Id, project.Name, project.HourValue, project.Creator.Name, new List<string>
-            {
-                creator.Name
-            });
+            return project;
         }
 
         public void Join(User user, int projectId)

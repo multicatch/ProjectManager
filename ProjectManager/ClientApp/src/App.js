@@ -9,6 +9,7 @@ import {request, Requests} from "./requests";
 import "./components/CreateProject";
 import {CreateProject} from "./components/CreateProject";
 import {Project} from "./components/Project";
+import {CreateIssue} from "./components/CreateIssue";
 
 export default class App extends Component {
     static displayName = App.name;
@@ -33,6 +34,7 @@ export default class App extends Component {
                     <Route exact path='/' component={Home}/>
                     <Route path='/createproject' component={CreateProject}/>
                     <Route path='/projectview/:id' component={Project}/>
+                    <Route path='/createissue/:id' component={CreateIssue}/>
                     <Route path='/counter' component={Counter}/>
                 </Layout>
             );

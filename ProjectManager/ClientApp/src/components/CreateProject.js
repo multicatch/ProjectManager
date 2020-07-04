@@ -51,7 +51,7 @@ export class CreateProject extends Component {
                     <FormGroup inline>
                         <Button color="primary" onClick={this.create}>Create project</Button>
                         <NavLink tag={Link} style={{display: 'inline-block'}} to="/">
-                            <Button color="primary" outline onClick={this.create}>Cancel</Button>
+                            <Button color="primary" outline>Cancel</Button>
                         </NavLink>
                     </FormGroup>
                     {this.state.submit ? <Redirect to="/"/> : ''}
@@ -91,6 +91,10 @@ export class CreateProject extends Component {
             this.setState({
                 submit: true
             })
+            return;
+        }
+        
+        if (!body.message) {
             return;
         }
 

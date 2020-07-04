@@ -37,11 +37,16 @@ namespace ProjectManager.Controllers
             try
             {
                 var user = _userRegistry.Find((int) userId);
-                return Ok(_projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue, user));
+                var project = _projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue, user);
+                return Ok(_projectsRegistry.GetDetails(project.Id));
             }
             catch (ArgumentException e)
             {
                 return BadRequest(new SimpleMessageResponse(e.Message));
+            }
+            catch (UserNotExistsException)
+            {
+                return Forbid();
             }
         }
 
@@ -56,13 +61,12 @@ namespace ProjectManager.Controllers
             {
                 var user = _userRegistry.Find((int) userId);
                 _projectsRegistry.Join(user, projectId);
+                return Ok();
             }
             catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException)
             {
                 return Forbid();
             }
-
-            return Ok();
         }
 
         [HttpDelete("{projectId}")]
@@ -76,6 +80,7 @@ namespace ProjectManager.Controllers
             {
                 var user = _userRegistry.Find((int) userId);
                 _projectsRegistry.Delete(user, projectId);
+                return Ok();
             }
             catch (Exception e) when (e is ProjectNotExistsException || e is ArgumentException)
             {
@@ -84,8 +89,10 @@ namespace ProjectManager.Controllers
                     StatusCode = 403
                 };
             }
-
-            return Ok();
+            catch (UserNotExistsException)
+            {
+                return Forbid();
+            }
         }
 
         [HttpGet("{projectId}")]

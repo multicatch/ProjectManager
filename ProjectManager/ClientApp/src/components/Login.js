@@ -103,7 +103,7 @@ export class Login extends Component {
         
         const body = await response.json()
         
-        if (body.message.includes('exists') || body.message.includes('Name')) {
+        if (body.message && (body.message.includes('exists') || body.message.includes('Name'))) {
             this.setState({
                 loginValid: false,
                 loginFeedback: body.message
