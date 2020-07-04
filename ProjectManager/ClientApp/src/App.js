@@ -11,6 +11,7 @@ import {CreateProject} from "./components/CreateProject";
 import {Project} from "./components/Project";
 import {CreateIssue} from "./components/CreateIssue";
 import {Issue} from "./components/Issue";
+import {EditIssue} from "./components/EditIssue";
 
 export default class App extends Component {
     static displayName = App.name;
@@ -36,9 +37,10 @@ export default class App extends Component {
                     <Route exact path='/create/issue' component={CreateProject}/>
                     <Route exact path='/view/project/:id' component={Project}/>
                     <Route exact path='/create/issue/:id' component={CreateIssue}/>
+                    <Route exact path='/edit/issue/:id' component={EditIssue}/>
+                    <Route exact path='/view/issue/:id' component={Issue}/>
                     <Route exact path='/view/user/:id' component={User}/>
                     <Route exact path='/view/user' component={User}/>
-                    <Route exact name="viewIssue" path='/view/issue/:id' component={Issue}/>
                 </Layout>
             );
         } else {

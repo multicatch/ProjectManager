@@ -79,18 +79,23 @@ export class Issue extends Component {
             <div>
                 {this.state.goBack ? <Redirect to="/"/> : ''}
                 <p>{this.parentIssue(this.state.parent)}</p>
-                <h2>{this.state.issue ? this.state.issue.type : ''} #{this.state.issue ? this.state.issue.id : ''}</h2>
-                <h3>{this.state.issue ? this.state.issue.name : ''}</h3>
+                <h4>{this.state.issue ? this.state.issue.type : ''} #{this.state.issue ? this.state.issue.id : ''}</h4>
+                <h2>{this.state.issue ? this.state.issue.name : ''}</h2>
                 <Badge color="primary">{this.state.issue ? this.state.issue.status : ''} </Badge>
                 <p>{this.state.issue ? this.state.issue.description : ''}</p>
 
+                <p>{this.state.issue ? <Link tag={Link} className="link-nopadding"
+                                to={`/edit/issue/${this.state.issue.id}`}>
+                    <Button outline color="primary" size={"sm"}>Edit this issue</Button>
+                    </Link> : ''}
+                </p>
                 <Row>
                     <Col>Project: {this.projectLink(this.state.issue)}</Col>
                     <Col>Assignee: {this.assigneeLink(this.state.issue)}</Col>
                     <Col>Estimated: {this.estimated(this.state.issue)}</Col>
                 </Row>
 
-                <p></p>
+                <p> </p>
                 {children}
             </div>
         );

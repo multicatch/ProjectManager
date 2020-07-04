@@ -35,6 +35,38 @@ namespace ProjectManager.Controllers
                 return Forbid();
             }
         }
+        
+        [HttpPut("{issueId}")]
+        public IActionResult UpdateIssue(int issueId, [FromBody] CreateIssueRequest request)
+        {
+            if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
+            var userId = HttpContext.Session.GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+            try
+            {
+                var assignee = _userRegistry.Find(request.Assignee);
+                var issue = _issueRegistry.Update(
+                    issueId,
+                    request.Name,
+                    request.Description,
+                    request.EstimateHours,
+                    request.Type,
+                    request.Status,
+                    assignee,
+                    request.Parent
+                );
+                return Ok(_issueRegistry.ConvertToDetails(issue));
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(new SimpleMessageResponse(e.Message));
+            }
+            catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException || e is IssueNotFoundException)
+            {
+                return Forbid();
+            }
+        }
+
 
         [HttpGet("user/{userId}")]
         public IActionResult ListForUser(int userId)

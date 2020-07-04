@@ -2,22 +2,10 @@ import React, {Component} from 'react';
 import {Button, Form, FormFeedback, FormGroup, Input, Label, NavLink} from "reactstrap";
 import {Link, Redirect} from "react-router-dom";
 import {request} from "../requests";
+import {CreateIssue} from "./CreateIssue";
 
-export class CreateIssue extends Component {
-    static displayName = CreateIssue.name;
-
-    static types = [
-        'Requirement',
-        'Task'
-    ]
-
-    static statuses = [
-        'Accepted',
-        'InProgress',
-        'Testing',
-        'Resolved',
-        'Rejected'
-    ]
+export class EditIssue extends Component {
+    static displayName = EditIssue.name;
 
     state = {
         name: '',
@@ -35,11 +23,11 @@ export class CreateIssue extends Component {
     }
 
     componentDidMount() {
-        this.fetchProject(this.props.match.params.id)
+        this.fetchIssue(this.props.match.params.id)
     }
 
     componentWillReceiveProps = (nextProps) => {
-        this.fetchProject(nextProps.match.params.id)
+        this.fetchIssue(nextProps.match.params.id)
     }
     
     render() {
@@ -54,9 +42,9 @@ export class CreateIssue extends Component {
 
         return (
             <div>
-                <h1>New issue creation</h1>
-                <p>Use this form to create a new issue for project {projectName}.</p>
-                <Form onSubmit={this.create}>
+                <h1>Issue #{this.state.issueId ? this.state.issueId : ''} editing</h1>
+                <p>Use this form to edit an existing issue of {projectName}.</p>
+                <Form onSubmit={this.update}>
                     <FormGroup>
                         <Label for="name">Name of issue</Label>
                         <Input type="text"
@@ -132,28 +120,45 @@ export class CreateIssue extends Component {
                         </Input>
                     </FormGroup>
                     <FormGroup inline>
-                        <Button color="primary" onClick={this.create}>Create issue</Button>
+                        <Button color="primary" onClick={this.update}>Update issue</Button>
                         <NavLink tag={Link} style={{display: 'inline-block'}}
-                                 to={"/view/project/" + this.props.match.params.id}>
+                                 to={"/view/issue/" + this.state.issueId}>
                             <Button color="primary" outline>Cancel</Button>
                         </NavLink>
                     </FormGroup>
-                    {this.state.submit ? <Redirect to={"/view/issue/" + this.state.submit} /> : ''}
+                    {this.state.submit ? <Redirect to={"/view/issue/" + this.state.issueId} /> : ''}
                 </Form>
             </div>
         );
     }
-
-    fetchProject = async (id) => {
-        const userResponse = await request('user');
-        if (userResponse.status !== 200) {
+    
+    fetchIssue = async (id) => {
+        const issuesResponse = await request('issues/' + id);
+        if (issuesResponse.status !== 200) {
+            this.setState({
+                goBack: true
+            })
             return;
         }
-        const user = await userResponse.json();
+        
+        const issue = await issuesResponse.json();
+        
+        await this.fetchProject(issue.project.id);
+        await this.fetchIssues(issue.project.id, issue.id);
+        
         this.setState({
-            user
+            issueId: issue.id,
+            name: issue.name,
+            description: issue.description,
+            estimate: issue.estimateHours,
+            type: issue.type,
+            status: issue.status,
+            assignee: issue.assignee.name,
+            parent: issue.parent ? issue.parent.id : null
         });
+    }
 
+    fetchProject = async (id) => {
         const projectsResponse = await request('projects/' + id);
         if (projectsResponse.status !== 200) {
             this.setState({
@@ -164,21 +169,18 @@ export class CreateIssue extends Component {
         const project = await projectsResponse.json();
 
         this.setState({
-            project,
-            assignee: user.name
+            project
         });
-        
-        return this.fetchIssues(project.id);
     }
     
-    fetchIssues = async (id) => {
+    fetchIssues = async (id, currentIssueId) => {
         const issuesResponse = await request('issues/project/' + id);
         if (issuesResponse.status !== 200) {
             return;
         }
         const body = await issuesResponse.json();
         this.setState({
-            issues: body
+            issues: body.filter(i => i.id !== currentIssueId)
         });
     }
 
@@ -251,10 +253,10 @@ export class CreateIssue extends Component {
         }
     }
 
-    create = async () => {
+    update = async () => {
         let estimate = parseInt(this.state.estimate)
 
-        const response = await request('issues/project/' + this.state.project.id, 'POST', {
+        const response = await request('issues/' + this.state.issueId, 'PUT', {
             'Name': this.state.name,
             'Description': this.state.description,
             'EstimateHours': estimate,
@@ -267,8 +269,8 @@ export class CreateIssue extends Component {
         const body = await response.json();
         if (response.status === 200) {
             this.setState({
-                submit: body.id
-            });
+                submit: true
+            })
             return;
         }
         

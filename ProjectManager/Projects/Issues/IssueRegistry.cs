@@ -106,6 +106,34 @@ namespace ProjectManager.Projects.Issues
 
             return issue;
         }
+
+        public Issue Update(int issueId, string name, string description, float? estimateHours,
+            IssueType type, IssueStatus status, User assignee, int? parent)
+        {
+            var issue = Get(issueId);
+            Validate.NotNullOrBlank(name);
+            if (issue.Parent != null)
+            {
+                var parentIssue = Get(issue.Parent.Id);
+                parentIssue.Children.Remove(issue);
+            }
+            if (parent != null)
+            {
+                var parentIssue = Get((int) parent);
+                issue.Parent = parentIssue;
+                parentIssue.Children.Add(issue);
+            }
+            
+            issue.Name = name;
+            issue.Description = description;
+            issue.EstimateHours = estimateHours;
+            issue.Type = type;
+            issue.Status = status;
+            issue.Assignee = assignee;
+
+            _databaseContext.SaveChanges();
+            return issue;
+        }
     }
 
     public class IssueDetails
