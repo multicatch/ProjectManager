@@ -31,11 +31,11 @@ namespace ProjectManager.Controllers
         }
         
         [HttpPost]
-        public IActionResult Authenticate([FromBody] UserRequest createUserRequest)
+        public IActionResult Authenticate([FromBody] UserRequest loginRequest)
         {
             try
             {
-                var user = _identityProvider.Authenticate(createUserRequest.Name, createUserRequest.Password);
+                var user = _identityProvider.Authenticate(loginRequest.Name, loginRequest.Password);
                 HttpContext.Session.SetUser(user);
                 return Ok();
             }

@@ -85,7 +85,6 @@ namespace ProjectManager.Projects
     {
         public int Id { get; }
         public string Name { get; }
-        
         public float HourValue { get;  }
         public List<string> Members { get; }
         
@@ -102,7 +101,6 @@ namespace ProjectManager.Projects
     {
         public ProjectNotExistsException(string message) : base(message)
         {
-            
         }
     }
 }
