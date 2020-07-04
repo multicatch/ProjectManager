@@ -61,6 +61,16 @@ namespace ProjectManager.Users
             }
             return user;
         }
+
+        public User Find(int id)
+        {
+            var user = _databaseContext.Users.AsEnumerable().SingleOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                throw new UserNotExistsException("User with Id " + id + " does not exist");
+            }
+            return user;
+        }
     }
 
     public class UserNotExistsException : Exception

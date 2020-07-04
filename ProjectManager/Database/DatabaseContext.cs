@@ -8,6 +8,8 @@ namespace ProjectManager.Database
         private readonly IConnectionInitializer _connectionInitializer;
         
         public DbSet<User> Users { get; set; }
+        public DbSet<Project> Projects { get; set; }
+        public DbSet<Issue> Issues { get; set; }
 
         public DatabaseContext(IConnectionInitializer connectionInitializer)
         {

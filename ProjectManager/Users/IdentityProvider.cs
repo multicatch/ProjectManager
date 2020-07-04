@@ -19,11 +19,17 @@ namespace ProjectManager.Users
         {
             Validate.NotNullOrBlank(username, "Username cannot not be blank.");
             Validate.NotNullOrBlank(password, "Password cannot not be blank.");
-            var user = _userRegistry.Find(username);
+            var user = Functional
+                .Try(() =>
+                    _userRegistry.Find(username)
+                ).On<UserNotExistsException>(e =>
+                    throw new AuthenticationException("Username or password is incorrect.")
+                ).OrElseThrow();
+
             var passwordCorrect = _passwordHash.Verify(password, user.PasswordHash);
             if (!passwordCorrect)
             {
-                throw new AuthenticationException("Password is incorrect.");
+                throw new AuthenticationException("Username or password is incorrect.");
             }
 
             return user;

@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Http;
 using ProjectManager.Database.Models;
 
@@ -14,10 +15,15 @@ namespace ProjectManager.Utils
 
         public static bool IsAuthenticated(this ISession session)
         {
-            var currentUser = session.GetInt32(CurrentUserIdKey);
+            var currentUser = GetCurrentUserId(session);
             if (currentUser != null) return true;
             session.Clear();
             return false;
+        }
+
+        public static int? GetCurrentUserId(this ISession session)
+        {
+            return session.GetInt32(CurrentUserIdKey);
         }
     }
 }

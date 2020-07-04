@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProjectManager.Database;
+using ProjectManager.Projects;
 using ProjectManager.Users;
 
 namespace ProjectManager
@@ -40,6 +41,7 @@ namespace ProjectManager
         {
             builder.RegisterModule(new DatabaseModule());
             builder.RegisterModule(new UserModule());
+            builder.RegisterModule(new ProjectsModule());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
