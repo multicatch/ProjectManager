@@ -42,9 +42,8 @@ namespace ProjectManager.Projects
             );
         }
 
-        public ProjectDetails GetDetails(int id)
+        public ProjectDetails ConvertToDetails(Project project)
         {
-            var project = Find(id);
             var members = project.Members?.ConvertAll(m => m.User.Name) ?? new List<string>();
             return new ProjectDetails(project.Id, project.Name, project.HourValue, project.Creator.Name, members);
         }

@@ -34,12 +34,6 @@ namespace ProjectManager.Projects.Issues
             );
         }
 
-        public IssueDetails GetDetails(int id)
-        {
-            var issue = Get(id);
-            return convertToDetails(issue);
-        }
-
         public List<Issue> GetAllForUser(User user)
         {
             return _databaseContext.Issues
@@ -58,7 +52,7 @@ namespace ProjectManager.Projects.Issues
                 .ToList();
         }
         
-        public IssueDetails convertToDetails(Issue i)
+        public IssueDetails ConvertToDetails(Issue i)
         {
             return new IssueDetails(
                 i.Id,
@@ -67,10 +61,10 @@ namespace ProjectManager.Projects.Issues
                 i.EstimateHours,
                 i.Type,
                 i.Status,
-                i.Assignee.Name,
+                new AssigneeDetails(i.Assignee.Id, i.Assignee.Name),
                 i.Parent?.Id,
-                _projectsRegistry.GetDetails(i.Project.Id),
-                i.Children.ConvertAll(c => c.Id)
+                _projectsRegistry.ConvertToDetails(_projectsRegistry.Find(i.Project.Id)),
+                i.Children?.ConvertAll(c => c.Id) ?? new List<int>()
             );
         }
 
@@ -117,7 +111,7 @@ namespace ProjectManager.Projects.Issues
     public class IssueDetails
     {
         public IssueDetails(int id, string name, string description, float? estimateHours, IssueType type,
-            IssueStatus status, string assignee, int? parent, ProjectDetails project, List<int> children)
+            IssueStatus status, AssigneeDetails assignee, int? parent, ProjectDetails project, List<int> children)
         {
             Id = id;
             Name = name;
@@ -137,10 +131,22 @@ namespace ProjectManager.Projects.Issues
         public float? EstimateHours { get; }
         public IssueType Type { get; }
         public IssueStatus Status { get; }
-        public string Assignee { get; }
+        public AssigneeDetails Assignee { get; }
         public int? Parent { get; }
         public ProjectDetails Project { get; }
         public List<int> Children { get; }
+    }
+
+    public class AssigneeDetails
+    {
+        public AssigneeDetails(int id, string name)
+        {
+            Id = id;
+            Name = name;
+        }
+
+        public int Id { get; }
+        public string Name { get;  }
     }
 
     public class IssueNotFoundException : Exception

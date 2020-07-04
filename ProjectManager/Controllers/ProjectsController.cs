@@ -38,7 +38,7 @@ namespace ProjectManager.Controllers
             {
                 var user = _userRegistry.Find((int) userId);
                 var project = _projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue, user);
-                return Ok(_projectsRegistry.GetDetails(project.Id));
+                return Ok(_projectsRegistry.ConvertToDetails(project));
             }
             catch (ArgumentException e)
             {
@@ -102,7 +102,8 @@ namespace ProjectManager.Controllers
 
             try
             {
-                return Ok(_projectsRegistry.GetDetails(projectId));
+                var project = _projectsRegistry.Find(projectId);
+                return Ok(_projectsRegistry.ConvertToDetails(project));
             }
             catch (ProjectNotExistsException)
             {

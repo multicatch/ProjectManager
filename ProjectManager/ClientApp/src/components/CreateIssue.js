@@ -30,6 +30,7 @@ export class CreateIssue extends Component {
         assignee: null,
         type: this.types[0],
         status: this.statuses[0],
+        parent: null,
         submit: false
     }
 
@@ -37,14 +38,19 @@ export class CreateIssue extends Component {
         this.fetchProject(this.props.match.params.id)
     }
 
+    componentWillReceiveProps = (nextProps) => {
+        this.fetchProject(nextProps.match.params.id)
+    }
+    
     render() {
-        const projectName = this.state.project ? this.state.project.name : ''
+        const projectName = this.state.project ? this.state.project.name : '';
         const members = this.state.project
             ? this.memberOptions(this.state.project)
-            : ''
+            : '';
 
-        const types = this.types.map(type => <option key={"type-" + type} value={type}>{type}</option>)
-        const statuses = this.statuses.map(status => <option key={"status-" + status} value={status}>{status}</option>)
+        const types = this.types.map(type => <option key={"type-" + type} value={type}>{type}</option>);
+        const statuses = this.statuses.map(status => <option key={"status-" + status} value={status}>{status}</option>);
+        const issues = this.issuesOptions(this.state.issues);
 
         return (
             <div>
@@ -114,14 +120,25 @@ export class CreateIssue extends Component {
                             {statuses}
                         </Input>
                     </FormGroup>
+                    <FormGroup>
+                        <Label for="statusSelect">Parent issue</Label>
+                        <Input type="select"
+                               name="parent"
+                               id="parentSelect"
+                               value={this.state.parent}
+                               onChange={this.setParent}
+                        >
+                            {issues}
+                        </Input>
+                    </FormGroup>
                     <FormGroup inline>
                         <Button color="primary" onClick={this.create}>Create issue</Button>
                         <NavLink tag={Link} style={{display: 'inline-block'}}
-                                 to={"/projectview/" + this.props.match.params.id}>
+                                 to={"/view/project/" + this.props.match.params.id}>
                             <Button color="primary" outline>Cancel</Button>
                         </NavLink>
                     </FormGroup>
-                    {this.state.submit ? <Redirect to={"/projectview/" + this.props.match.params.id} /> : ''}
+                    {this.state.submit ? <Redirect to={"/view/project/" + this.props.match.params.id} /> : ''}
                 </Form>
             </div>
         );
@@ -150,12 +167,36 @@ export class CreateIssue extends Component {
             project,
             assignee: user.name
         });
+        
+        return this.fetchIssues(project.id);
+    }
+    
+    fetchIssues = async (id) => {
+        const issuesResponse = await request('issues/project/' + id);
+        if (issuesResponse.status !== 200) {
+            return;
+        }
+        const body = await issuesResponse.json();
+        this.setState({
+            issues: body
+        });
     }
 
     memberOptions = (project) => {
         return project.members.map(member =>
             <option key={"member-" + member} value={member}>{member}</option>
         );
+    }
+
+    issuesOptions = (issues) => {
+        let list = [];
+        if (issues) {
+            list = issues.map(issue =>
+                <option key={"issue-" + issue.id} value={issue.id}>#{issue.id} {issue.name}</option>
+            );
+        }
+        list = [<option key={"issue-empty"} value={null}> - </option>, ...list];
+        return list;
     }
 
     setName = (e) => {
@@ -196,6 +237,19 @@ export class CreateIssue extends Component {
             status: e.target.value
         })
     }
+    
+    setParent = (e) => {
+        const value = e.target.value;
+        if (value) {
+            this.setState({
+                parent: value
+            });
+        } else {
+            this.setState({
+                parent: null
+            });
+        }
+    }
 
     create = async () => {
         let estimate = parseInt(this.state.estimate)
@@ -206,7 +260,8 @@ export class CreateIssue extends Component {
             'EstimateHours': estimate,
             'Type': this.state.type,
             'Status': this.state.status,
-            'Assignee': this.state.assignee
+            'Assignee': this.state.assignee,
+            'Parent': parseInt(this.state.parent)
         });
 
         const body = await response.json();

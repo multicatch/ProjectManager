@@ -52,7 +52,7 @@ export class Home extends Component {
     
     projectName = (project, enterable) => {
         if (enterable) {
-            return <td><NavLink tag={Link} className="link-nopadding" to={`/projectview/${project.id}`}>{project.name}</NavLink></td>
+            return <td><NavLink tag={Link} className="link-nopadding" to={`/view/project/${project.id}`}>{project.name}</NavLink></td>
         } else {
             return <td>{project.name}</td>
         }
@@ -106,7 +106,7 @@ export class Home extends Component {
                 <h1>Hello, world!</h1>
                 <p>Welcome to ProjectManager. Here are your projects:</p>
                 {userProjects}
-                <p><NavLink tag={Link} className="text-dark" to="/createproject"><Button color="primary">Create
+                <p><NavLink tag={Link} className="text-dark" to="/create/issue"><Button color="primary">Create
                     project</Button></NavLink></p>
                 <p>You can also join other projects:</p>
                 {otherProjects}

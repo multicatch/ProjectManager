@@ -21,6 +21,10 @@ export class Project extends Component {
         this.fetchProject(this.props.match.params.id)
     }
 
+    componentWillReceiveProps = (nextProps) => {
+        this.fetchProject(nextProps.match.params.id)
+    }
+
     getLeaveButton = () => {
         if (this.state.project.creator === this.state.user.name) {
             return <td><Button size="sm" color="danger"
@@ -69,7 +73,7 @@ export class Project extends Component {
 
     render() {
         const issueTable = this.state.issues
-            ? this.issueTable(this.state.issues)
+            ? Project.issueTable(this.state.issues)
             : <p><em>Loading...</em></p>;
 
         const projectId = this.state.project
@@ -85,7 +89,7 @@ export class Project extends Component {
                 <h4>Members</h4>
                 {this.memberList()}
                 <h4>Issues
-                    <NavLink tag={Link} style={{display: 'inline-block'}} to={"/createissue/" + projectId}>
+                    <NavLink tag={Link} style={{display: 'inline-block'}} to={"/create/issue/" + projectId}>
                         <Button size="sm">Create Issue</Button>
                     </NavLink>
                 </h4>
@@ -94,7 +98,7 @@ export class Project extends Component {
         );
     }
 
-    issueTable = (issues) => {
+    static issueTable = (issues) => {
         return (
             <table className='table table-striped' aria-labelledby="projectsTable">
                 <thead>
@@ -109,8 +113,8 @@ export class Project extends Component {
                 {issues.map(issue =>
                     <tr key={`issue-${issue.id}`}>
                         <td>{issue.id}</td>
-                        <td>{issue.name}</td>
-                        <td>{issue.assignee}</td>
+                        <td><NavLink tag={Link} className="link-nopadding" to={`/view/issue/${issue.id}`}>{issue.name}</NavLink></td>
+                        <td><NavLink tag={Link} className="link-nopadding" to={`/view/user/${issue.assignee.id}`}>{issue.assignee.name}</NavLink></td>
                         <td>{issue.status}</td>
                     </tr>
                 )}

@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using ProjectManager.Database;
 using ProjectManager.Database.Models;
 using ProjectManager.Utils;
@@ -64,7 +65,10 @@ namespace ProjectManager.Users
 
         public User Find(int id)
         {
-            var user = _databaseContext.Users.AsEnumerable().SingleOrDefault(u => u.Id == id);
+            var user = _databaseContext.Users
+                .Include(u => u.Projects)
+                .AsEnumerable()
+                .SingleOrDefault(u => u.Id == id);
             if (user == null)
             {
                 throw new UserNotExistsException("User with Id " + id + " does not exist");

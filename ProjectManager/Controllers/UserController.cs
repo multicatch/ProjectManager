@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ProjectManager.Projects;
 using ProjectManager.Users;
 using ProjectManager.Utils;
 
@@ -11,12 +13,14 @@ namespace ProjectManager.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserRegistry _userRegistry;
+        private readonly ProjectsRegistry _projectsRegistry;
         private readonly ILogger<UserController> _logger;
 
-        public UserController(UserRegistry userRegistry, ILogger<UserController> logger)
+        public UserController(UserRegistry userRegistry, ILogger<UserController> logger, ProjectsRegistry projectsRegistry)
         {
             _userRegistry = userRegistry;
             _logger = logger;
+            _projectsRegistry = projectsRegistry;
         }
 
         [HttpGet]
@@ -25,14 +29,24 @@ namespace ProjectManager.Controllers
             if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
 
             var userId = HttpContext.Session.GetCurrentUserId();
-            if (userId == null) return Unauthorized();
+            return userId == null ? Unauthorized() : GetUserData((int) userId);
+        }
+        
+        [HttpGet("{userId}")]
+        public IActionResult GetUserData(int userId)
+        {
+            if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
+
             try
             {
                 var currentUserData = _userRegistry.Find((int) userId);
                 var userInfo = new UserInfoResponse
                 {
                     Id = currentUserData.Id,
-                    Name = currentUserData.Name
+                    Name = currentUserData.Name,
+                    Projects = currentUserData.Projects
+                        .ConvertAll(p => _projectsRegistry.Find(p.ProjectId))
+                        .ConvertAll(_projectsRegistry.ConvertToDetails)
                 };
                 return Ok(userInfo);
             }
@@ -73,5 +87,6 @@ namespace ProjectManager.Controllers
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public List<ProjectDetails> Projects { get; set; }
     }
 }

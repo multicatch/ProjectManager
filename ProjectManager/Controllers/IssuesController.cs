@@ -21,17 +21,30 @@ namespace ProjectManager.Controllers
             _userRegistry = userRegistry;
         }
 
-        [HttpGet]
-        public IActionResult List()
+        [HttpGet("{issueId}")]
+        public IActionResult GetIssueDetails(int issueId)
         {
             if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
-            var userId = HttpContext.Session.GetCurrentUserId();
-            if (userId == null) return Unauthorized();
             try
             {
-                var user = _userRegistry.Find((int) userId);
+                var issues = _issueRegistry.Get(issueId);
+                return Ok(_issueRegistry.ConvertToDetails(issues));
+            }
+            catch (Exception e) when (e is IssueNotFoundException)
+            {
+                return Forbid();
+            }
+        }
+
+        [HttpGet("user/{userId}")]
+        public IActionResult ListForUser(int userId)
+        {
+            if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
+            try
+            {
+                var user = _userRegistry.Find(userId);
                 var issues = _issueRegistry.GetAllForUser(user)
-                    .ConvertAll(_issueRegistry.convertToDetails);
+                    .ConvertAll(_issueRegistry.ConvertToDetails);
                 return Ok(issues);
             }
             catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException || e is ArgumentException)
@@ -41,14 +54,14 @@ namespace ProjectManager.Controllers
         }
 
         [HttpGet("project/{projectId}")]
-        public IActionResult List(int projectId)
+        public IActionResult ListForProject(int projectId)
         {
             if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
 
             try
             {
                 return Ok(_issueRegistry.GetAllForProject(projectId)
-                    .ConvertAll(_issueRegistry.convertToDetails));
+                    .ConvertAll(_issueRegistry.ConvertToDetails));
             }
             catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException || e is ArgumentException)
             {
@@ -76,7 +89,7 @@ namespace ProjectManager.Controllers
                     assignee,
                     request.Parent
                 );
-                return Ok(_issueRegistry.GetDetails(issue.Id));
+                return Ok(_issueRegistry.ConvertToDetails(issue));
             }
             catch (ArgumentException e)
             {
