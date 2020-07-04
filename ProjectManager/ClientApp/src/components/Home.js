@@ -1,26 +1,98 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
+import {request} from "../requests";
+import {Button} from "reactstrap";
 
 export class Home extends Component {
-  static displayName = Home.name;
+    static displayName = Home.name;
+    
+    state = {
+        userProjects: null,
+        otherProjects: null
+    }
 
-  render () {
-    return (
-      <div>
-        <h1>Hello, world!</h1>
-        <p>Welcome to your new single-page application, built with:</p>
-        <ul>
-          <li><a href='https://get.asp.net/'>ASP.NET Core</a> and <a href='https://msdn.microsoft.com/en-us/library/67ef8sbd.aspx'>C#</a> for cross-platform server-side code</li>
-          <li><a href='https://facebook.github.io/react/'>React</a> for client-side code</li>
-          <li><a href='http://getbootstrap.com/'>Bootstrap</a> for layout and styling</li>
-        </ul>
-        <p>To help you get started, we have also set up:</p>
-        <ul>
-          <li><strong>Client-side navigation</strong>. For example, click <em>Counter</em> then <em>Back</em> to return here.</li>
-          <li><strong>Development server integration</strong>. In development mode, the development server from <code>create-react-app</code> runs in the background automatically, so your client-side resources are dynamically built on demand and the page refreshes when you modify any file.</li>
-          <li><strong>Efficient production builds</strong>. In production mode, development-time features are disabled, and your <code>dotnet publish</code> configuration produces minified, efficiently bundled JavaScript files.</li>
-        </ul>
-        <p>The <code>ClientApp</code> subdirectory is a standard React application based on the <code>create-react-app</code> template. If you open a command prompt in that directory, you can run <code>npm</code> commands such as <code>npm test</code> or <code>npm install</code>.</p>
-      </div>
-    );
-  }
+    componentDidMount() {
+        this.fetchProjects()
+    }
+
+    renderProjectsTable = (projects, joinable = false) => {
+        return (
+            <table className='table table-striped' aria-labelledby="projectsTable">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Hour Rate</th>
+                    <th>No. Of Members</th>
+                    {joinable ? <th>Join</th> : <th>Leave</th>}
+                </tr>
+                </thead>
+                <tbody>
+                {projects.map(project =>
+                    <tr key={`project-${project.id}`}>
+                        <td>{project.id}</td>
+                        <td>{project.name}</td>
+                        <td>{project.hourValue}</td>
+                        <td>{project.members.length}</td>
+                        {joinable ? <td><Button size="sm" onClick={() => this.joinProject(project.id)}>Join</Button></td> 
+                            : <td><Button size="sm" onClick={() => this.leaveProject(project.id)}>Leave</Button></td>}
+                    </tr>
+                )}
+                </tbody>
+            </table>
+        );
+    }
+    
+    fetchProjects = async () => {
+        const userResponse = await request('user');
+        if (userResponse.status !== 200) {
+            return;
+        }
+        const user = await userResponse.json();
+        
+        const projectsResponse = await request('projects');
+        if (projectsResponse.status !== 200) {
+            return;
+        }
+        const projects = await projectsResponse.json();
+        
+        const userProjects = projects.filter(project => project.members.includes(user.name))
+        const otherProjects = projects.filter(project => !project.members.includes(user.name))
+        
+        this.setState({
+            userProjects,
+            otherProjects
+        });
+    }
+
+    render() {
+        const userProjects = this.state.userProjects
+            ? this.renderProjectsTable(this.state.userProjects)
+            : <p><em>Loading...</em></p>;
+
+
+        const otherProjects = this.state.otherProjects
+            ? this.renderProjectsTable(this.state.otherProjects, true)
+            : <p><em>Loading...</em></p>;
+
+        return (
+            <div>
+                <h1>Hello, world!</h1>
+                <p>Welcome to ProjectManager. Here are your projects:</p>
+                {userProjects}
+                <p><Button>Create project</Button></p>
+                <p>You can also join other projects:</p>
+                {otherProjects}
+            </div>
+        );
+    }
+    
+    joinProject = async (id) => {
+        await request('projects/' + id, 'POST');
+        return this.fetchProjects();
+    }
+    
+    leaveProject = async (id) => {
+        await request('projects/' + id + '/members', 'DELETE');
+        return this.fetchProjects();
+    }
 }

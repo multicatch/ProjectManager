@@ -2,6 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using ProjectManager.Users;
+using ProjectManager.Utils;
 
 namespace ProjectManager.Controllers
 {
@@ -16,6 +17,29 @@ namespace ProjectManager.Controllers
         {
             _userRegistry = userRegistry;
             _logger = logger;
+        }
+
+        [HttpGet]
+        public IActionResult GetCurrentUserData()
+        {
+            if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
+
+            var userId = HttpContext.Session.GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+            try
+            {
+                var currentUserData = _userRegistry.Find((int) userId);
+                var userInfo = new UserInfoResponse
+                {
+                    Id = currentUserData.Id,
+                    Name = currentUserData.Name
+                };
+                return Ok(userInfo);
+            }
+            catch (Exception e) when (e is UserNotExistsException)
+            {
+                return Forbid();
+            }
         }
 
         [HttpPost]
@@ -43,5 +67,11 @@ namespace ProjectManager.Controllers
     {
         public string Name { get; set; }
         public string Password { get; set; }
+    }
+
+    public class UserInfoResponse
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

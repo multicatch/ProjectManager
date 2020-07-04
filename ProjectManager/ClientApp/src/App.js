@@ -6,7 +6,7 @@ import {FetchData} from './components/FetchData';
 import {Counter} from './components/Counter';
 import './custom.css'
 import {Login} from "./components/Login";
-import {request} from "./requests";
+import {request, Requests} from "./requests";
 
 export default class App extends Component {
     static displayName = App.name;
@@ -17,6 +17,11 @@ export default class App extends Component {
     
     componentDidMount() {
         this.checkIfLogged()
+        Requests.invalidSessionFallback = () => {
+            this.setState({
+                logged: false
+            });
+        }
     }
 
     render() {
@@ -38,7 +43,7 @@ export default class App extends Component {
     }
 
     checkIfLogged = async () => {
-        const response = await fetch('authentication', request('GET'));
+        const response = await request('authentication','GET');
         const status = response.status;
         this.setState({
             logged: status === 200

@@ -20,7 +20,7 @@ export class Login extends Component {
             <Container className={"login-container"}>
                 <h1>Login</h1>
                 <p>Login or register to continue.</p>
-                <Form>
+                <Form onSubmit={this.login}>
                     <FormGroup>
                         <Input type="text"
                                name="login"
@@ -70,10 +70,10 @@ export class Login extends Component {
     }
 
     login = async () => {
-        const response = await fetch('authentication', request('POST', {
+        const response = await request('authentication', 'POST', {
             'Name': this.state.login,
             'Password': this.state.password
-        }));
+        });
         const status = response.status;
         const successfulLogin = status === 200;
         this.setState({
@@ -91,10 +91,10 @@ export class Login extends Component {
     }
     
     register = async () => {
-        const response = await fetch('user', request('POST', {
+        const response = await request('user', 'POST', {
             'Name': this.state.login,
             'Password': this.state.password
-        }));
+        });
         const status = response.status;
         
         if (status === 200) {
@@ -114,6 +114,5 @@ export class Login extends Component {
                 passwordFeedback: body.message
             })
         }
-        
     }
 }

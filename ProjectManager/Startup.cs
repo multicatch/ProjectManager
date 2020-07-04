@@ -27,7 +27,7 @@ namespace ProjectManager
             services.AddSession(options =>
             {
                 options.Cookie.Name = ".ProjectManager.Session";
-                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
                 options.Cookie.IsEssential = true;
             });
             

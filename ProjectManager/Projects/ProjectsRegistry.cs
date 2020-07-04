@@ -60,7 +60,9 @@ namespace ProjectManager.Projects
                 Project = project,
                 User = user
             };
+            project.Members ??= new List<UserProject>();
             project.Members.Add(userProject);
+            user.Projects ??= new List<UserProject>();
             user.Projects.Add(userProject);
             _databaseContext.Add(userProject);
             _databaseContext.SaveChanges();
@@ -69,6 +71,7 @@ namespace ProjectManager.Projects
         public void RemoveFromProject(User user, int projectId)
         {
             var project = Find(projectId);
+            project.Members ??= new List<UserProject>();
             var userProject = project.Members.Find(p => p.User == user);
             project.Members = project.Members.FindAll(p => p.User != user);
             user.Projects = user.Projects.FindAll(p => p.Project != project);
