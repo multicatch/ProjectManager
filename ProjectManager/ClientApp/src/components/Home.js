@@ -36,7 +36,7 @@ export class Home extends Component {
                 {projects.map(project =>
                     <tr key={`project-${project.id}`}>
                         <td>{project.id}</td>
-                        <td>{project.name}</td>
+                        {this.projectName(project, !joinable)}
                         <td>{project.creator}</td>
                         <td>{project.hourValue}</td>
                         <td>{project.members.length}</td>
@@ -48,6 +48,14 @@ export class Home extends Component {
                 </tbody>
             </table>
         );
+    }
+    
+    projectName = (project, enterable) => {
+        if (enterable) {
+            return <td><NavLink tag={Link} className="link-nopadding" to={`/projectview/${project.id}`}>{project.name}</NavLink></td>
+        } else {
+            return <td>{project.name}</td>
+        }
     }
 
     getLeaveButton = (project) => {

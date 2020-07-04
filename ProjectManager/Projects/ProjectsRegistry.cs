@@ -40,7 +40,14 @@ namespace ProjectManager.Projects
             return Validate.NotNullOrElseThrow(project,
                 () => new ProjectNotExistsException("Project with Id " + id + " does not exist.")
             );
-        } 
+        }
+
+        public ProjectDetails GetDetails(int id)
+        {
+            var project = Find(id);
+            var members = project.Members?.ConvertAll(m => m.User.Name) ?? new List<string>();
+            return new ProjectDetails(project.Id, project.Name, project.HourValue, project.Creator.Name, members);
+        }
 
         public ProjectDetails Create(string name, float hourValue, User creator)
         {

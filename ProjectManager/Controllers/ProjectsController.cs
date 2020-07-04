@@ -88,14 +88,14 @@ namespace ProjectManager.Controllers
             return Ok();
         }
 
-        [HttpGet("{projectId}/members")]
-        public IActionResult ListMembers(int projectId)
+        [HttpGet("{projectId}")]
+        public IActionResult GetDetails(int projectId)
         {
             if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
 
             try
             {
-                return Ok(_projectsRegistry.Find(projectId));
+                return Ok(_projectsRegistry.GetDetails(projectId));
             }
             catch (ProjectNotExistsException)
             {

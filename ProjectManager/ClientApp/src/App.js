@@ -8,6 +8,7 @@ import {Login} from "./components/Login";
 import {request, Requests} from "./requests";
 import "./components/CreateProject";
 import {CreateProject} from "./components/CreateProject";
+import {Project} from "./components/Project";
 
 export default class App extends Component {
     static displayName = App.name;
@@ -31,6 +32,7 @@ export default class App extends Component {
                 <Layout>
                     <Route exact path='/' component={Home}/>
                     <Route path='/createproject' component={CreateProject}/>
+                    <Route path='/projectview/:id' component={Project}/>
                     <Route path='/counter' component={Counter}/>
                 </Layout>
             );
