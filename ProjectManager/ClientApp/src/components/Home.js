@@ -5,8 +5,12 @@ import {Link} from "react-router-dom";
 
 export class Home extends Component {
     static displayName = Home.name;
-    
+
     state = {
+        user: {
+            id: -1,
+            name: ''
+        },
         userProjects: null,
         otherProjects: null
     }
@@ -22,9 +26,10 @@ export class Home extends Component {
                 <tr>
                     <th>Id</th>
                     <th>Name</th>
+                    <th>Creator</th>
                     <th>Hour Rate</th>
                     <th>No. Of Members</th>
-                    {joinable ? <th>Join</th> : <th>Leave</th>}
+                    {joinable ? <th>Join</th> : <th>Leave/Remove</th>}
                 </tr>
                 </thead>
                 <tbody>
@@ -32,33 +37,46 @@ export class Home extends Component {
                     <tr key={`project-${project.id}`}>
                         <td>{project.id}</td>
                         <td>{project.name}</td>
+                        <td>{project.creator}</td>
                         <td>{project.hourValue}</td>
                         <td>{project.members.length}</td>
-                        {joinable ? <td><Button size="sm" onClick={() => this.joinProject(project.id)}>Join</Button></td> 
-                            : <td><Button size="sm" onClick={() => this.leaveProject(project.id)}>Leave</Button></td>}
+                        {joinable ?
+                            <td><Button size="sm" onClick={() => this.joinProject(project.id)}>Join</Button></td>
+                            : this.getLeaveButton(project)}
                     </tr>
                 )}
                 </tbody>
             </table>
         );
     }
-    
+
+    getLeaveButton = (project) => {
+        if (project.creator === this.state.user.name) {
+            return <td><Button size="sm" color="danger" onClick={() => this.removeProject(project.id)}>Remove</Button></td>
+        } else {
+            return <td><Button size="sm" onClick={() => this.leaveProject(project.id)}>Leave</Button></td>
+        }
+    }
+
     fetchProjects = async () => {
         const userResponse = await request('user');
         if (userResponse.status !== 200) {
             return;
         }
         const user = await userResponse.json();
-        
+        this.setState({
+            user
+        });
+
         const projectsResponse = await request('projects');
         if (projectsResponse.status !== 200) {
             return;
         }
         const projects = await projectsResponse.json();
-        
+
         const userProjects = projects.filter(project => project.members.includes(user.name))
         const otherProjects = projects.filter(project => !project.members.includes(user.name))
-        
+
         this.setState({
             userProjects,
             otherProjects
@@ -80,20 +98,26 @@ export class Home extends Component {
                 <h1>Hello, world!</h1>
                 <p>Welcome to ProjectManager. Here are your projects:</p>
                 {userProjects}
-                <p><NavLink tag={Link} className="text-dark" to="/createproject"><Button color="primary">Create project</Button></NavLink></p>
+                <p><NavLink tag={Link} className="text-dark" to="/createproject"><Button color="primary">Create
+                    project</Button></NavLink></p>
                 <p>You can also join other projects:</p>
                 {otherProjects}
             </div>
         );
     }
-    
+
     joinProject = async (id) => {
         await request('projects/' + id, 'POST');
         return this.fetchProjects();
     }
-    
+
     leaveProject = async (id) => {
         await request('projects/' + id + '/members', 'DELETE');
+        return this.fetchProjects();
+    }
+    
+    removeProject = async (id) => {
+        await request('projects/' + id, 'DELETE');
         return this.fetchProjects();
     }
 }

@@ -12,6 +12,7 @@ namespace ProjectManager.Database.Models
         public string Name { get; set; }
         public string PasswordHash { get; set; }
         
+        [InverseProperty("User")]
         public List<UserProject> Projects { get; set; }
     }
 }

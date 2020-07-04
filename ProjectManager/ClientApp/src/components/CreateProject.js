@@ -88,7 +88,6 @@ export class CreateProject extends Component {
 
         const body = await response.json();
         if (response.status === 200) {
-            await request('projects/' + body.id, 'POST')
             this.setState({
                 submit: true
             })

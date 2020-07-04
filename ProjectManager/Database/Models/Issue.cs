@@ -17,6 +17,7 @@ namespace ProjectManager.Database.Models
         public User Assignee { get; set; }
         public Issue Parent { get; set; }
         public Project Project { get; set; }
+        [InverseProperty("Parent")]
         public List<Issue> Children { get; set; }
     }
 

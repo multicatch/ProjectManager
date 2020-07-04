@@ -20,6 +20,26 @@ namespace ProjectManager.Database
         {
             _connectionInitializer.Configure(optionsBuilder);
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UserProject>()
+                .HasKey(up => new { up.ProjectId, up.UserId });
+            modelBuilder.Entity<UserProject>()
+                .HasOne(up => up.Project)
+                .WithMany(p => p.Members)
+                .HasForeignKey(up => up.ProjectId);
+            modelBuilder.Entity<UserProject>()
+                .HasOne(up => up.User)
+                .WithMany(u => u.Projects)
+                .HasForeignKey(up => up.UserId);
+            modelBuilder.Entity<Project>()
+                .HasMany(p => p.Issues)
+                .WithOne(i => i.Project);
+            modelBuilder.Entity<Issue>()
+                .HasMany(i => i.Children)
+                .WithOne(i => i.Parent);
+        }
     }
 
     public interface IConnectionInitializer

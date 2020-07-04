@@ -32,9 +32,12 @@ namespace ProjectManager.Controllers
         {
             if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
 
+            var userId = HttpContext.Session.GetCurrentUserId();
+            if (userId == null) return Unauthorized();
             try
             {
-                return Ok(_projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue));
+                var user = _userRegistry.Find((int) userId);
+                return Ok(_projectsRegistry.Create(createProjectRequest.Name, createProjectRequest.HourValue, user));
             }
             catch (ArgumentException e)
             {
@@ -57,6 +60,29 @@ namespace ProjectManager.Controllers
             catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException)
             {
                 return Forbid();
+            }
+
+            return Ok();
+        }
+
+        [HttpDelete("{projectId}")]
+        public IActionResult Delete(int projectId)
+        {
+            if (!HttpContext.Session.IsAuthenticated()) return Unauthorized();
+
+            var userId = HttpContext.Session.GetCurrentUserId();
+            if (userId == null) return Unauthorized();
+            try
+            {
+                var user = _userRegistry.Find((int) userId);
+                _projectsRegistry.Delete(user, projectId);
+            }
+            catch (Exception e) when (e is ProjectNotExistsException || e is ArgumentException)
+            {
+                return new ObjectResult(new SimpleMessageResponse(e.Message))
+                {    
+                    StatusCode = 403
+                };
             }
 
             return Ok();
@@ -90,7 +116,7 @@ namespace ProjectManager.Controllers
                 _projectsRegistry.RemoveFromProject(user, projectId);
                 return Ok();
             }
-            catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException)
+            catch (Exception e) when (e is UserNotExistsException || e is ProjectNotExistsException || e is ArgumentException)
             {
                 return Forbid();
             }

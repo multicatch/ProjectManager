@@ -11,7 +11,12 @@ namespace ProjectManager.Database.Models
         public int Id { get; set; }
         public string Name { get; set; }
         public float HourValue { get; set; }
+        public User Creator { get; set; }
+        
+        [InverseProperty("Project")]
         public List<UserProject> Members { get; set; }
+        
+        [InverseProperty("Project")]
         public List<Issue> Issues { get; set; }
     }
 }
