@@ -131,6 +131,7 @@ namespace ProjectManager.Projects.Issues
             issue.Status = status;
             issue.Assignee = assignee;
 
+            _databaseContext.Update(issue);
             _databaseContext.SaveChanges();
             return issue;
         }
